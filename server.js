@@ -1,18 +1,19 @@
 'use strict';
 
-const express       = require('express');
-const session       = require('express-session');
-const bodyParser    = require('body-parser');
-const fccTesting    = require('./freeCodeCamp/fcctesting.js');
-const auth          = require('./app/auth.js');
-const routes        = require('./app/routes.js');
-const mongo         = require('mongodb').MongoClient;
-const passport      = require('passport');
-const cookieParser  = require('cookie-parser')
-const app           = express();
-const http          = require('http').Server(app);
-const sessionStore  = new session.MemoryStore();
-const io            = require('socket.io')(http);
+const express           = require('express');
+const session           = require('express-session');
+const bodyParser        = require('body-parser');
+const fccTesting        = require('./freeCodeCamp/fcctesting.js');
+const auth              = require('./app/auth.js');
+const routes            = require('./app/routes.js');
+const mongo             = require('mongodb').MongoClient;
+const passport          = require('passport');
+const cookieParser      = require('cookie-parser')
+const app               = express();
+const http              = require('http').Server(app);
+const sessionStore      = new session.MemoryStore();
+const io                = require('socket.io')(http);
+const passportSocketIo  = require('passport.socketio');
 
 fccTesting(app); //For FCC testing purposes
 
@@ -38,15 +39,24 @@ mongo.connect(process.env.DATABASE, (err, db) => {
     routes(app, db);
       
     http.listen(process.env.PORT || 3000);
+    
+    //initialize io to use passport.socketio. This npm library can get information 
+    //about a connected user from a session cookie
+    io.use(passportSocketIo.authorize({
+      cookieParser: cookieParser,
+      key:          'express.sid',
+      secret:       process.env.SESSION_SECRET,
+      store:        sessionStore
+    }));
 
     //start socket.io code  
     var currentUsers = 0;
     io.on('connection', socket => {
-      console.log('A user has connected');
+      console.log(socket.request.user.name + ' has connected');
       ++currentUsers;
       io.emit('user count', currentUsers);
       socket.on('disconnect', () => { 
-        console.log('A user has disconnected.');
+        console.log(socket.request.user.name + ' has disconnected.');
       });
     });
   
