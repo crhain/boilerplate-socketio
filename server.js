@@ -53,6 +53,9 @@ mongo.connect(process.env.DATABASE, (err, db) => {
     var currentUsers = 0;
     io.on('connection', socket => {
       console.log(socket.request.user.name + ' has connected');
+      socket.on('chat message', message =>{
+        console.log('message: ' + message);
+      });
       ++currentUsers;
       io.emit('user', {name: socket.request.user.name, currentUsers, connected: true});
       
