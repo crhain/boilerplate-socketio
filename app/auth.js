@@ -33,8 +33,8 @@ module.exports = function (app, db) {
               {$setOnInsert:{
                   id: profile.id,
                   name: profile.displayName || 'Anonymous',
-                  photo: profile.photos[0].value || '',
-                  email: profile.emails[0].value || 'No public email',
+                  photo: profile.photos ? profile.photos[0].value : '',
+                  email: profile.emails ? profile.emails[0].value : 'No public email',
                   created_on: new Date(),
                   provider: profile.provider || '',
                   chat_messages: 0
