@@ -23,7 +23,7 @@ $( document ).ready(function() {
     var messageToSend = $('#m').val();
     //send message to server
     console.log(messageToSend);
-    socket.emit('chat message', messageToSend);    
+    socket.emit('chat', messageToSend);    
     //clear chat box
     $('#m').val('');
     return false; // prevent form submit from refreshing page
